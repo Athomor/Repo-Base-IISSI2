@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Image, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native'
+import { Image, Platform, Pressable, ScrollView, StyleSheet, View, Switch } from 'react-native'
 import * as ExpoImagePicker from 'expo-image-picker'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import * as yup from 'yup'
@@ -19,7 +19,7 @@ export default function CreateRestaurantScreen ({ navigation }) {
   const [restaurantCategories, setRestaurantCategories] = useState([])
   const [backendErrors, setBackendErrors] = useState()
 
-  const initialRestaurantValues = { name: null, description: null, address: null, postalCode: null, url: null, shippingCosts: null, email: null, phone: null, restaurantCategoryId: null }
+  const initialRestaurantValues = { name: null, description: null, address: null, postalCode: null, url: null, shippingCosts: null, email: null, phone: null, restaurantCategoryId: null, promoted: false }
   const validationSchema = yup.object().shape({
     name: yup
       .string()
@@ -41,6 +41,8 @@ export default function CreateRestaurantScreen ({ navigation }) {
       .number()
       .positive('Please provide a valid shipping cost value')
       .required('Shipping costs value is required'),
+    false: yup
+      .boolean(),
     email: yup
       .string()
       .nullable()
@@ -161,6 +163,17 @@ export default function CreateRestaurantScreen ({ navigation }) {
                 name='phone'
                 label='Phone:'
               />
+
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <TextRegular style= {{ marginTop: 30, marginRight: 10 }}>Do you want to promote the restaurant?</TextRegular>
+                <Switch
+                  trackColor={{ false: GlobalStyles.brandSecondary, true: GlobalStyles.brandPrimary }}
+                  thumbColor={values.promoted ? GlobalStyles.brandSecondary : '#f4f3f4'}
+                  value={values.promoted}
+                  style={[styles.switch, { marginTop: 30 }]}
+                  onValueChange={value => setFieldValue('promoted', value)}
+                />
+              </View>
 
               <DropDownPicker
                 open={open}

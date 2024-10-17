@@ -1,4 +1,4 @@
-import { Product, ProductCategory, Restaurant, RestaurantCategory } from '../models/models.js'
+import { Product, ProductCategory, Restaurant, RestaurantCategory, sequelizeSession } from '../models/models.js'
 
 const index = async function (req, res) {
   try {
@@ -96,25 +96,28 @@ const destroy = async function (req, res) {
   }
 }
 
-const promote = async function (req, res) {
+const promote = async function (req, res, next) {
+  const t = await sequelizeSession.transaction()
   try {
     const promotedRestaurant = await Restaurant.findOne({ where: { promoted: true } })
 
     if (promotedRestaurant) {
       await Restaurant.update(
         { promoted: false },
-        { where: { id: promotedRestaurant.id } }
+        { where: { id: promotedRestaurant.id }, transaction: t }
       )
     }
 
     await Restaurant.update(
       { promoted: true },
-      { where: { id: req.params.restaurantId } }
+      { where: { id: req.params.restaurantId }, transaction: t }
     )
 
+    await t.commit()
     res.status(200).send('Restaurant promoted successfully!')
   } catch (error) {
-    res.status(500).send(error)
+    await t.rollback()
+    next(error)
   }
 }
 

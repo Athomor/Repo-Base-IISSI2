@@ -46,7 +46,7 @@ export default function RestaurantsScreen ({ navigation, route }) {
           <TextSemiBold textStyle={{ color: GlobalStyles.brandSuccess }}>Promoted!</TextSemiBold>
         }
         { item.promoted === false &&
-          <TextSemiBold textStyle={{ color: GlobalStyles.brandPrimary }}>upta</TextSemiBold>
+          <TextSemiBold textStyle={{ color: GlobalStyles.brandPrimary }}>Not promoted</TextSemiBold>
         }
         <View style={styles.actionButtonsContainer}>
           <Pressable
@@ -223,7 +223,7 @@ export default function RestaurantsScreen ({ navigation, route }) {
       isVisible={restaurantToBePromoted !== null}
       onCancel={() => setRestaurantToBePromoted(null)}
       onConfirm={() => promoteRestaurant(restaurantToBePromoted)}>
-        <TextRegular>Seguro que quiere promocionar el restaurante {item => item.name}?</TextRegular>
+        <TextRegular>Seguro que quiere promocionar este restaurante?</TextRegular>
         <TextRegular>Si ya tiene un restaurante promocionado, dejará de estarlo.</TextRegular>
     </ConfirmationModal>
     </>

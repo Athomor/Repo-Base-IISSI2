@@ -1,6 +1,21 @@
 import { check } from 'express-validator'
+import { Restaurant } from '../../../src/models/models.js'
 import { checkFileIsImage, checkFileMaxSize } from './FileValidationHelper.js'
 const maxFileSize = 2000000 // around 2Mb
+
+const onlyOnePromotedRestaurantPerOwner = async (ownerId, promotedValue) => {
+  if (promotedValue) {
+    try {
+      const promotedRestaurant = await Restaurant.findAll({ where: { userId: ownerId, promoted: true } })
+      if (promotedRestaurant.length !== 0) {
+        return Promise.reject(new Error('You only can promote one restaurant at a time'))
+      }
+    } catch (error) {
+      return Promise.reject(new Error(error))
+    }
+  }
+  return Promise.resolve('ok')
+}
 
 const create = [
   check('name').exists().isString().isLength({ min: 1, max: 255 }).trim(),
@@ -9,7 +24,7 @@ const create = [
   check('postalCode').exists().isString().isLength({ min: 1, max: 255 }),
   check('url').optional({ nullable: true, checkFalsy: true }).isString().isURL().trim(),
   check('shippingCosts').exists().isFloat({ min: 0 }).toFloat(),
-  check('promoted').exists().isBoolean().trim(),
+  check('promoted').custom(onlyOnePromotedRestaurantPerOwner).withMessage('You can only promote one restaurant at a time.'),
   check('email').optional({ nullable: true, checkFalsy: true }).isString().isEmail().trim(),
   check('phone').optional({ nullable: true, checkFalsy: true }).isString().isLength({ min: 1, max: 255 }).trim(),
   check('restaurantCategoryId').exists({ checkNull: true }).isInt({ min: 1 }).toInt(),
@@ -34,7 +49,7 @@ const update = [
   check('postalCode').exists().isString().isLength({ min: 1, max: 255 }),
   check('url').optional({ nullable: true, checkFalsy: true }).isString().isURL().trim(),
   check('shippingCosts').exists().isFloat({ min: 0 }).toFloat(),
-  check('promoted').exists().isBoolean().trim(),
+  check('promoted').custom(onlyOnePromotedRestaurantPerOwner).withMessage('You can only promote one restaurant at a time.'),
   check('email').optional({ nullable: true, checkFalsy: true }).isString().isEmail().trim(),
   check('phone').optional({ nullable: true, checkFalsy: true }).isString().isLength({ min: 1, max: 255 }).trim(),
   check('restaurantCategoryId').exists({ checkNull: true }).isInt({ min: 1 }).toInt(),
