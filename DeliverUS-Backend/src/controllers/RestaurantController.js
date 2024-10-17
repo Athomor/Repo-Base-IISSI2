@@ -1,4 +1,4 @@
-import { Restaurant, Product, RestaurantCategory, ProductCategory } from '../models/models.js'
+import { Product, ProductCategory, Restaurant, RestaurantCategory } from '../models/models.js'
 
 const index = async function (req, res) {
   try {
@@ -41,6 +41,7 @@ const create = async function (req, res) {
   newRestaurant.userId = req.user.id // usuario actualmente autenticado
   try {
     const restaurant = await newRestaurant.save()
+    // res.status(200).send('Restaurant successfully created.')
     res.json(restaurant)
   } catch (err) {
     res.status(500).send(err)
@@ -95,12 +96,35 @@ const destroy = async function (req, res) {
   }
 }
 
+const promote = async function (req, res) {
+  try {
+    const promotedRestaurant = await Restaurant.findOne({ where: { promoted: true } })
+
+    if (promotedRestaurant) {
+      await Restaurant.update(
+        { promoted: false },
+        { where: { id: promotedRestaurant.id } }
+      )
+    }
+
+    await Restaurant.update(
+      { promoted: true },
+      { where: { id: req.params.restaurantId } }
+    )
+
+    res.status(200).send('Restaurant promoted successfully!')
+  } catch (error) {
+    res.status(500).send(error)
+  }
+}
+
 const RestaurantController = {
   index,
   indexOwner,
   create,
   show,
   update,
-  destroy
+  destroy,
+  promote
 }
 export default RestaurantController
