@@ -40,6 +40,30 @@ const create = async function (req, res) {
   let newProduct = Product.build(req.body)
   try {
     newProduct = await newProduct.save()
+
+    const restaurant = Restaurant.findByPk(req.params.restaurantId)
+    const avgPriceMyProducts = await Product.findOne(({
+      where: {
+        restaurantId: { [Sequelize.Op]: restaurant.restaurantId }
+      },
+      attributes: [
+        [Sequelize.fn('AVG', Sequelize.col('price')), 'avgPrice']
+      ]
+    }))
+    const avgPriceOtherProducts = await Product.findOne(({
+      where: {
+        restaurantId: { [Sequelize.Op.ne]: restaurant.restaurantId }
+      },
+      attributes: [
+        [Sequelize.fn('AVG', Sequelize.col('price')), 'avgPrice']
+      ]
+    }))
+
+    await Restaurant.update(
+      { economic: avgPriceMyProducts <= avgPriceOtherProducts },
+      { where: { id: req.body.restaurantId }, fields: ['economic'] }
+    )
+
     res.json(newProduct)
   } catch (err) {
     res.status(500).send(err)
@@ -50,6 +74,30 @@ const update = async function (req, res) {
   try {
     await Product.update(req.body, { where: { id: req.params.productId } })
     const updatedProduct = await Product.findByPk(req.params.productId)
+
+    const restaurant = Restaurant.findByPk(req.params.restaurantId)
+    const avgPriceMyProducts = await Product.findOne(({
+      where: {
+        restaurantId: { [Sequelize.Op]: restaurant.restaurantId }
+      },
+      attributes: [
+        [Sequelize.fn('AVG', Sequelize.col('price')), 'avgPrice']
+      ]
+    }))
+    const avgPriceOtherProducts = await Product.findOne(({
+      where: {
+        restaurantId: { [Sequelize.Op.ne]: restaurant.restaurantId }
+      },
+      attributes: [
+        [Sequelize.fn('AVG', Sequelize.col('price')), 'avgPrice']
+      ]
+    }))
+
+    await Restaurant.update(
+      { economic: avgPriceMyProducts <= avgPriceOtherProducts },
+      { where: { id: req.body.restaurantId }, fields: ['economic'] }
+    )
+
     res.json(updatedProduct)
   } catch (err) {
     res.status(500).send(err)
@@ -107,6 +155,34 @@ const popular = async function (req, res) {
   }
 }
 
+// const updateEconomicRestaurant = async function (restaurantId) {
+//   const avgPriceOtherProducts = await Product.findOne(({
+//     where: {
+//       restaurantId: { [Sequelize.Op.ne]: restaurantId }
+//     },
+//     attributes: [
+//       [Sequelize.fn('AVG', Sequelize.col('price')), 'avgPrice']
+//     ]
+//   }))
+//   const avgPriceMyProducts = await Product.findOne(({
+//     where: {
+//       restaurantId: { [Sequelize.Op]: restaurantId }
+//     },
+//     attributes: [
+//       [Sequelize.fn('AVG', Sequelize.col('price')), 'avgPrice']
+//     ]
+//   }))
+//   const restaurant = await Restaurant.findByPk(restaurantId)
+//   if (avgPriceOtherProducts !== null && avgPriceMyProducts !== null) {
+//     if (avgPriceMyProducts.dataValues.avgPrice < avgPriceOtherProducts.dataValues.avgPrice) {
+//       restaurant.economic = true
+//     } else {
+//       restaurant.economic = false
+//     }
+//   }
+//   await restaurant.save()
+// }
+
 const ProductController = {
   indexRestaurant,
   show,
@@ -114,5 +190,6 @@ const ProductController = {
   update,
   destroy,
   popular
+  // updateEconomicRestaurant
 }
 export default ProductController

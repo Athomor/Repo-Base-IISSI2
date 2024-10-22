@@ -36,9 +36,17 @@ export default function RestaurantsScreen ({ navigation, route }) {
         }}
       >
         <TextRegular numberOfLines={2}>{item.description}</TextRegular>
-        {item.averageServiceMinutes !== null &&
-          <TextSemiBold>Avg. service time: <TextSemiBold textStyle={{ color: GlobalStyles.brandPrimary }}>{item.averageServiceMinutes} min.</TextSemiBold></TextSemiBold>
-        }
+        <View>
+          {item.averageServiceMinutes !== null &&
+            <TextSemiBold>Avg. service time: <TextSemiBold textStyle={{ color: GlobalStyles.brandPrimary }}>{item.averageServiceMinutes} min.</TextSemiBold></TextSemiBold>
+          }
+          {item.economic !== false &&
+            <TextSemiBold textStyle={{ color: GlobalStyles.brandSuccess }}>€</TextSemiBold>
+          }
+          {item.economic !== true &&
+            <TextSemiBold textStyle={{ color: GlobalStyles.brandPrimary }}>€€</TextSemiBold>
+          }
+        </View>
         <TextSemiBold>Shipping: <TextSemiBold textStyle={{ color: GlobalStyles.brandPrimary }}>{item.shippingCosts.toFixed(2)}€</TextSemiBold></TextSemiBold>
         <View style={styles.actionButtonsContainer}>
           <Pressable
