@@ -1,5 +1,5 @@
-import { Product, Order, Restaurant, RestaurantCategory, ProductCategory } from '../models/models.js'
 import Sequelize from 'sequelize'
+import { Order, Product, ProductCategory, Restaurant, RestaurantCategory } from '../models/models.js'
 
 const indexRestaurant = async function (req, res) {
   try {
@@ -11,7 +11,8 @@ const indexRestaurant = async function (req, res) {
         {
           model: ProductCategory,
           as: 'productCategory'
-        }]
+        }],
+      order: [['promoted', 'DESC']]
     })
     res.json(products)
   } catch (err) {
@@ -107,12 +108,35 @@ const popular = async function (req, res) {
   }
 }
 
+const promote = async function (req, res) {
+  try {
+    const promotedProducts = await Product.findAll({
+      where: { restaurantId: req.params.restaurantId, promoted: true }
+    })
+
+    if (promotedProducts.length() > 5) {
+      const olderPromotedProduct = Product.findOne({
+        where: { promoted: true },
+        order: [['promotedAt', 'DESC']]
+      })
+      await Product.update({ promoted: false, promotedAt: null }, { where: { id: olderPromotedProduct.id } })
+      await Product.update({ promoted: true, promotedAt: new Date() }, { where: { id: req.params.productId } })
+    }
+
+    const updatedProduct = await Product.findByPk(req.params.productId)
+    res.json(updatedProduct)
+  } catch (err) {
+    res.status(500).send(err)
+  }
+}
+
 const ProductController = {
   indexRestaurant,
   show,
   create,
   update,
   destroy,
-  popular
+  popular,
+  promote
 }
 export default ProductController

@@ -27,6 +27,13 @@ module.exports = {
       availability: {
         type: Sequelize.BOOLEAN
       },
+      promoted: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false
+      },
+      promotedAt: {
+        type: Sequelize.DATE
+      },
       restaurantId: {
         type: Sequelize.INTEGER,
         allowNull: false,

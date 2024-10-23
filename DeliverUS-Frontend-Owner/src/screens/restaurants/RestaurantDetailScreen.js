@@ -1,20 +1,22 @@
 /* eslint-disable react/prop-types */
-import React, { useEffect, useState } from 'react'
-import { StyleSheet, View, FlatList, ImageBackground, Image, Pressable } from 'react-native'
-import { showMessage } from 'react-native-flash-message'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
+import React, { useEffect, useState } from 'react'
+import { FlatList, Image, ImageBackground, Pressable, StyleSheet, View } from 'react-native'
+import { showMessage } from 'react-native-flash-message'
+import defaultProductImage from '../../../assets/product.jpeg'
+import { promote, remove } from '../../api/ProductEndpoints'
 import { getDetail } from '../../api/RestaurantEndpoints'
-import { remove } from '../../api/ProductEndpoints'
+import ConfirmationModal from '../../components/ConfirmationModal'
+import DeleteModal from '../../components/DeleteModal'
 import ImageCard from '../../components/ImageCard'
 import TextRegular from '../../components/TextRegular'
 import TextSemiBold from '../../components/TextSemibold'
 import * as GlobalStyles from '../../styles/GlobalStyles'
-import DeleteModal from '../../components/DeleteModal'
-import defaultProductImage from '../../../assets/product.jpeg'
 
 export default function RestaurantDetailScreen ({ navigation, route }) {
   const [restaurant, setRestaurant] = useState({})
   const [productToBeDeleted, setProductToBeDeleted] = useState(null)
+  const [productToBePromoted, setProductToBePromoted] = useState(null)
 
   useEffect(() => {
     fetchRestaurantDetail()
@@ -65,7 +67,10 @@ export default function RestaurantDetailScreen ({ navigation, route }) {
         {!item.availability &&
           <TextRegular textStyle={styles.availability }>Not available</TextRegular>
         }
-         <View style={styles.actionButtonsContainer}>
+        {item.promoted &&
+          <TextRegular style={{ color: GlobalStyles.brandSuccess }}>Promoted!</TextRegular>
+        }
+        <View style={styles.actionButtonsContainer}>
           <Pressable
             onPress={() => navigation.navigate('EditProductScreen', { id: item.id })
             }
@@ -99,6 +104,24 @@ export default function RestaurantDetailScreen ({ navigation, route }) {
             <MaterialCommunityIcons name='delete' color={'white'} size={20}/>
             <TextRegular textStyle={styles.text}>
               Delete
+            </TextRegular>
+          </View>
+        </Pressable>
+
+        <Pressable
+            onPress={() => { setProductToBePromoted(item) }}
+            style={({ pressed }) => [
+              {
+                backgroundColor: pressed
+                  ? GlobalStyles.brandSuccessTap
+                  : GlobalStyles.brandSuccess
+              },
+              styles.actionButton
+            ]}>
+          <View style={[{ flex: 1, flexDirection: 'row', justifyContent: 'center' }]}>
+            <MaterialCommunityIcons name='alert-octagram' color={'white'} size={20}/>
+            <TextRegular textStyle={styles.text}>
+              Promote
             </TextRegular>
           </View>
         </Pressable>
@@ -152,6 +175,29 @@ export default function RestaurantDetailScreen ({ navigation, route }) {
     }
   }
 
+  const promoteProduct = async (product) => {
+    try {
+      await promote(product.id)
+      await fetchRestaurantDetail()
+      setProductToBePromoted(null)
+      showMessage({
+        message: `Product ${product.name} succesfully promoted`,
+        type: 'success',
+        style: GlobalStyles.flashStyle,
+        titleStyle: GlobalStyles.flashTextStyle
+      })
+    } catch (error) {
+      console.log(error)
+      setProductToBePromoted(null)
+      showMessage({
+        message: `Product ${product.name} could not be promoted.`,
+        type: 'error',
+        style: GlobalStyles.flashStyle,
+        titleStyle: GlobalStyles.flashTextStyle
+      })
+    }
+  }
+
   return (
     <View style={styles.container}>
       <FlatList
@@ -168,6 +214,11 @@ export default function RestaurantDetailScreen ({ navigation, route }) {
         onConfirm={() => removeProduct(productToBeDeleted)}>
           <TextRegular>If the product belong to some order, it cannot be deleted.</TextRegular>
       </DeleteModal>
+      <ConfirmationModal
+        isVisible={productToBePromoted !== null}
+        onCancel={() => setProductToBePromoted(null)}
+        onConfirm={() => promoteProduct(productToBePromoted)}>
+      </ConfirmationModal>
     </View>
   )
 }
@@ -243,6 +294,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     bottom: 5,
     position: 'absolute',
-    width: '90%'
+    width: '63%'
   }
 })

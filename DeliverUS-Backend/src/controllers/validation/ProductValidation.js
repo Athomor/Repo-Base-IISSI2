@@ -1,8 +1,25 @@
 import { check } from 'express-validator'
-import { Restaurant } from '../../models/models.js'
+import { Product, Restaurant } from '../../models/models.js'
 import { checkFileIsImage, checkFileMaxSize } from './FileValidationHelper.js'
 
 const maxFileSize = 2000000 // around 2Mb
+
+const check5PromotedProducts = async (value, { req }) => {
+  if (value) {
+    try {
+      const promotedProducts = await Product.findAll({
+        where: { restaurantId: req.body.restaurantId, promoted: true }
+      })
+      if (promotedProducts.length() > 5) {
+        return Promise.reject(new Error('You cannot promote more than 5 products'))
+      } else {
+        return Promise.resolve('OK')
+      }
+    } catch (error) {
+      return Promise.reject(new Error(error))
+    }
+  }
+}
 
 const checkRestaurantExists = async (value, { req }) => {
   try {
@@ -21,6 +38,7 @@ const create = [
   check('order').default(null).optional({ nullable: true }).isInt().toInt(),
   check('availability').optional().isBoolean().toBoolean(),
   check('productCategoryId').exists().isInt({ min: 1 }).toInt(),
+  check('promoted').custom(check5PromotedProducts),
   check('restaurantId').exists().isInt({ min: 1 }).toInt(),
   check('restaurantId').custom(checkRestaurantExists),
   check('image').custom((value, { req }) => {
@@ -38,6 +56,7 @@ const update = [
   check('order').default(null).optional({ nullable: true }).isInt().toInt(),
   check('availability').optional().isBoolean().toBoolean(),
   check('productCategoryId').exists().isInt({ min: 1 }).toInt(),
+  check('promoted').custom(check5PromotedProducts),
   check('restaurantId').not().exists(),
   check('image').custom((value, { req }) => {
     return checkFileIsImage(req, 'image')
