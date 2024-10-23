@@ -30,7 +30,7 @@ export default function RestaurantsScreen ({ navigation, route }) {
     return (
       <ImageCard
         imageUri={item.logo ? { uri: process.env.API_BASE_URL + '/' + item.logo } : restaurantLogo}
-        title={item.name}
+        title={item.discountCode && item.discountValue ? <TextSemiBold textStyle={{ fontSize: 16 }}>{item.name} <TextSemiBold textStyle={{ color: 'red' }}>({item.discountValue}% of discount using the code {item.discountCode})</TextSemiBold></TextSemiBold> : item.name}
         onPress={() => {
           navigation.navigate('RestaurantDetailScreen', { id: item.id })
         }}

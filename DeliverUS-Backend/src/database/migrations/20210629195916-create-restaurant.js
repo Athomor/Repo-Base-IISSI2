@@ -34,6 +34,14 @@ module.exports = {
         allowNull: true,
         type: Sequelize.DOUBLE
       },
+      discountCode: {
+        type: Sequelize.STRING,
+        defaultValue: null
+      },
+      discountValue: {
+        type: Sequelize.INTEGER,
+        defaultValue: null
+      },
       email: {
         type: Sequelize.STRING
       },

@@ -22,7 +22,7 @@ export default function EditRestaurantScreen ({ navigation, route }) {
   const [backendErrors, setBackendErrors] = useState()
   const [restaurant, setRestaurant] = useState({})
 
-  const [initialRestaurantValues, setInitialRestaurantValues] = useState({ name: null, description: null, address: null, postalCode: null, url: null, shippingCosts: null, email: null, phone: null, restaurantCategoryId: null, logo: null, heroImage: null })
+  const [initialRestaurantValues, setInitialRestaurantValues] = useState({ name: null, description: null, address: null, postalCode: null, url: null, shippingCosts: null, discountCode: null, discountValue: null, email: null, phone: null, restaurantCategoryId: null, logo: null, heroImage: null })
   const validationSchema = yup.object().shape({
     name: yup
       .string()
@@ -44,6 +44,15 @@ export default function EditRestaurantScreen ({ navigation, route }) {
       .number()
       .positive('Please provide a valid shipping cost value')
       .required('Shipping costs value is required'),
+    discountCode: yup
+      .string()
+      .nullable()
+      .max(10, 'Discount code too long'),
+    discountValue: yup
+      .number()
+      .nullable()
+      .min(1, 'Discount value must be between 1 and 99')
+      .max(99, 'Discount value must be between 1 and 99'),
     email: yup
       .string()
       .nullable()
@@ -177,6 +186,14 @@ export default function EditRestaurantScreen ({ navigation, route }) {
               <InputItem
                 name='shippingCosts'
                 label='Shipping costs:'
+              />
+              <InputItem
+                name='discountCode'
+                label='Discount Code:'
+              />
+              <InputItem
+                name='discountValue'
+                label='Discount Value:'
               />
               <InputItem
                 name='email'
