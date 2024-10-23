@@ -16,6 +16,20 @@ export default function RestaurantDetailScreen ({ navigation, route }) {
   const [restaurant, setRestaurant] = useState({})
   const [productToBeDeleted, setProductToBeDeleted] = useState(null)
 
+  const AnimatedColorText = () => {
+    const [animatedColor, setAnimatedColor] = useState('blue')
+
+    useEffect(() => {
+      const interval = setInterval(() => {
+        setAnimatedColor((prevColor) => (prevColor === 'black' ? 'blue' : 'black'))
+      }, 1000)
+
+      return () => clearInterval(interval)
+    }, [])
+
+    return <TextSemiBold style={[styles.message, { color: animatedColor }]}>{restaurant.message}</TextSemiBold>
+  }
+
   useEffect(() => {
     fetchRestaurantDetail()
   }, [route])
@@ -31,6 +45,9 @@ export default function RestaurantDetailScreen ({ navigation, route }) {
             <TextRegular textStyle={styles.description}>{restaurant.restaurantCategory ? restaurant.restaurantCategory.name : ''}</TextRegular>
           </View>
         </ImageBackground>
+
+        <AnimatedColorText>
+        </AnimatedColorText>
 
         <Pressable
           onPress={() => navigation.navigate('CreateProductScreen', { id: restaurant.id })
@@ -173,6 +190,13 @@ export default function RestaurantDetailScreen ({ navigation, route }) {
 }
 
 const styles = StyleSheet.create({
+  message: {
+    alignSelf: 'center',
+    flexDirection: 'row',
+    fontSize: 20,
+    margin: 10,
+    marginBottom: 5
+  },
   container: {
     flex: 1
   },

@@ -43,6 +43,10 @@ module.exports = {
       logo: {
         type: Sequelize.STRING
       },
+      message: {
+        type: Sequelize.STRING,
+        defaultValue: null
+      },
       heroImage: {
         type: Sequelize.STRING
       },

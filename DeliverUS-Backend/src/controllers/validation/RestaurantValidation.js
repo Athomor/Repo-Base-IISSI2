@@ -5,6 +5,7 @@ const maxFileSize = 2000000 // around 2Mb
 const create = [
   check('name').exists().isString().isLength({ min: 1, max: 255 }).trim(),
   check('description').optional({ nullable: true, checkFalsy: true }).isString().trim(),
+  check('message').optional({ nullable: true }).isString().isLength({ max: 500 }).trim(),
   check('address').exists().isString().isLength({ min: 1, max: 255 }).trim(),
   check('postalCode').exists().isString().isLength({ min: 1, max: 255 }),
   check('url').optional({ nullable: true, checkFalsy: true }).isString().isURL().trim(),
@@ -29,6 +30,7 @@ const create = [
 const update = [
   check('name').exists().isString().isLength({ min: 1, max: 255 }).trim(),
   check('description').optional({ nullable: true, checkFalsy: true }).isString().trim(),
+  check('message').optional({ nullable: true }).isString().isLength({ max: 500 }).trim(),
   check('address').exists().isString().isLength({ min: 1, max: 255 }).trim(),
   check('postalCode').exists().isString().isLength({ min: 1, max: 255 }),
   check('url').optional({ nullable: true, checkFalsy: true }).isString().isURL().trim(),

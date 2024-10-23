@@ -19,7 +19,7 @@ export default function CreateRestaurantScreen ({ navigation }) {
   const [restaurantCategories, setRestaurantCategories] = useState([])
   const [backendErrors, setBackendErrors] = useState()
 
-  const initialRestaurantValues = { name: null, description: null, address: null, postalCode: null, url: null, shippingCosts: null, email: null, phone: null, restaurantCategoryId: null }
+  const initialRestaurantValues = { name: null, description: null, message: null, address: null, postalCode: null, url: null, shippingCosts: null, email: null, phone: null, restaurantCategoryId: null }
   const validationSchema = yup.object().shape({
     name: yup
       .string()
@@ -29,6 +29,10 @@ export default function CreateRestaurantScreen ({ navigation }) {
       .string()
       .max(255, 'Address too long')
       .required('Address is required'),
+    message: yup
+      .string()
+      .nullable()
+      .max(500, 'Message too long'),
     postalCode: yup
       .string()
       .max(255, 'Postal code too long')
@@ -136,6 +140,10 @@ export default function CreateRestaurantScreen ({ navigation }) {
               <InputItem
                 name='description'
                 label='Description:'
+              />
+              <InputItem
+                name='message'
+                label='Message for fans:'
               />
               <InputItem
                 name='address'
