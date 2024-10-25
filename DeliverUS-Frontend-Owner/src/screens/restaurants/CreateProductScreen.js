@@ -205,7 +205,6 @@ const styles = StyleSheet.create({
     color: 'white',
     textAlign: 'center',
     marginLeft: 5
-
   },
   imagePicker: {
     height: 40,
