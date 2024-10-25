@@ -10,10 +10,10 @@ const index = async function (req, res) {
 }
 
 const create = async function (req, res) {
-  let newCategory = RestaurantCategory.build(req.body)
+  const newCategory = RestaurantCategory.build(req.body)
   try {
-    newCategory = await newCategory.save()
-    res.json(newCategory)
+    const restaurantCategory = await newCategory.save()
+    res.json(restaurantCategory)
   } catch (err) {
     res.status(500).send(err)
   }

@@ -1,20 +1,20 @@
+import { MaterialCommunityIcons } from '@expo/vector-icons'
+import * as ExpoImagePicker from 'expo-image-picker'
+import { ErrorMessage, Formik } from 'formik'
 import React, { useEffect, useState } from 'react'
 import { Image, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native'
-import * as ExpoImagePicker from 'expo-image-picker'
-import { MaterialCommunityIcons } from '@expo/vector-icons'
-import * as yup from 'yup'
 import DropDownPicker from 'react-native-dropdown-picker'
+import { showMessage } from 'react-native-flash-message'
+import * as yup from 'yup'
+import restaurantBackground from '../../../assets/restaurantBackground.jpeg'
+import restaurantLogo from '../../../assets/restaurantLogo.jpeg'
 import { create, getRestaurantCategories } from '../../api/RestaurantEndpoints'
 import InputItem from '../../components/InputItem'
+import TextError from '../../components/TextError'
 import TextRegular from '../../components/TextRegular'
 import * as GlobalStyles from '../../styles/GlobalStyles'
-import restaurantLogo from '../../../assets/restaurantLogo.jpeg'
-import restaurantBackground from '../../../assets/restaurantBackground.jpeg'
-import { showMessage } from 'react-native-flash-message'
-import { ErrorMessage, Formik } from 'formik'
-import TextError from '../../components/TextError'
 
-export default function CreateRestaurantScreen ({ navigation }) {
+export default function CreateRestaurantScreen ({ navigation, route }) {
   const [open, setOpen] = useState(false)
   const [restaurantCategories, setRestaurantCategories] = useState([])
   const [backendErrors, setBackendErrors] = useState()
@@ -76,8 +76,11 @@ export default function CreateRestaurantScreen ({ navigation }) {
         })
       }
     }
-    fetchRestaurantCategories()
-  }, [])
+    const unsuscribe = navigation.addListener('focus', () => {
+      fetchRestaurantCategories()
+    })
+    return unsuscribe
+  }, [route])
 
   useEffect(() => {
     (async () => {
