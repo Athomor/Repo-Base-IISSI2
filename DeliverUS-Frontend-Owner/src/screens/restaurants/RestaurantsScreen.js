@@ -1,29 +1,43 @@
 /* eslint-disable react/prop-types */
 import React, { useContext, useEffect, useState } from 'react'
-import { StyleSheet, FlatList, Pressable, View } from 'react-native'
+import { ActivityIndicator, FlatList, Pressable, StyleSheet, View } from 'react-native'
 
-import { getAll, remove } from '../../api/RestaurantEndpoints'
-import ImageCard from '../../components/ImageCard'
-import TextSemiBold from '../../components/TextSemibold'
-import TextRegular from '../../components/TextRegular'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
-import * as GlobalStyles from '../../styles/GlobalStyles'
-import { AuthorizationContext } from '../../context/AuthorizationContext'
 import { showMessage } from 'react-native-flash-message'
-import DeleteModal from '../../components/DeleteModal'
 import restaurantLogo from '../../../assets/restaurantLogo.jpeg'
+import { getAll, remove } from '../../api/RestaurantEndpoints'
+import DeleteModal from '../../components/DeleteModal'
+import ImageCard from '../../components/ImageCard'
+import TextRegular from '../../components/TextRegular'
+import TextSemiBold from '../../components/TextSemibold'
+import { AuthorizationContext } from '../../context/AuthorizationContext'
+import * as GlobalStyles from '../../styles/GlobalStyles'
 
 export default function RestaurantsScreen ({ navigation, route }) {
   const [restaurants, setRestaurants] = useState([])
   const [restaurantToBeDeleted, setRestaurantToBeDeleted] = useState(null)
   const { loggedInUser } = useContext(AuthorizationContext)
+  const [isLoading, setIsLoading] = useState(true)
+
+  // useEffect(() => {
+  //   if (loggedInUser) {
+  //     fetchRestaurants()
+  //   } else {
+  //     setRestaurants(null)
+  //   }
+  // }, [loggedInUser, route])
 
   useEffect(() => {
-    if (loggedInUser) {
-      fetchRestaurants()
-    } else {
-      setRestaurants(null)
-    }
+    console.log('Loading restaurants, please wait 5 seconds')
+    setTimeout(() => {
+      if (loggedInUser) {
+        fetchRestaurants()
+      } else {
+        setRestaurants([])
+      }
+      setIsLoading(false)
+      console.log('Restaurants loaded')
+    }, 650)
   }, [loggedInUser, route])
 
   const renderRestaurant = ({ item }) => {
@@ -155,21 +169,32 @@ export default function RestaurantsScreen ({ navigation, route }) {
 
   return (
     <>
-    <FlatList
-      style={styles.container}
-      data={restaurants}
-      renderItem={renderRestaurant}
-      keyExtractor={item => item.id.toString()}
-      ListHeaderComponent={renderHeader}
-      ListEmptyComponent={renderEmptyRestaurantsList}
-    />
-    <DeleteModal
-      isVisible={restaurantToBeDeleted !== null}
-      onCancel={() => setRestaurantToBeDeleted(null)}
-      onConfirm={() => removeRestaurant(restaurantToBeDeleted)}>
-        <TextRegular>The products of this restaurant will be deleted as well</TextRegular>
-        <TextRegular>If the restaurant has orders, it cannot be deleted.</TextRegular>
-    </DeleteModal>
+      {isLoading
+        ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color = {GlobalStyles.blue} />
+          <TextRegular style = {{ color: GlobalStyles.blue, fontSize: 15 }}>Loading restaurants, please wait...</TextRegular>
+        </View>
+          )
+        : (
+      <>
+      <FlatList
+        style={styles.container}
+        data={restaurants}
+        renderItem={renderRestaurant}
+        keyExtractor={item => item.id.toString()}
+        ListHeaderComponent={renderHeader}
+        ListEmptyComponent={renderEmptyRestaurantsList}
+      />
+      <DeleteModal
+        isVisible={restaurantToBeDeleted !== null}
+        onCancel={() => setRestaurantToBeDeleted(null)}
+        onConfirm={() => removeRestaurant(restaurantToBeDeleted)}>
+          <TextRegular>The products of this restaurant will be deleted as well</TextRegular>
+          <TextRegular>If the restaurant has orders, it cannot be deleted.</TextRegular>
+      </DeleteModal>
+      </>
+          )}
     </>
   )
 }
@@ -177,6 +202,11 @@ export default function RestaurantsScreen ({ navigation, route }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center'
   },
   button: {
     borderRadius: 8,

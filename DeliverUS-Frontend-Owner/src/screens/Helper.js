@@ -1,7 +1,7 @@
 const buildInitialValues = (entity, initialEntityValues) => {
   const initialValues = { ...initialEntityValues }
   Object.keys(initialEntityValues).forEach(key => {
-    if (key in entity) {
+    if (key in entity && key !== 'password') {
       initialValues[key] = entity[key]
     }
   })
