@@ -1,13 +1,14 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { Formik } from 'formik'
 import React, { useState } from 'react'
-import { InputItem, Pressable, ScrollView, View, StyleSheet } from 'react-native'
+import { Pressable, ScrollView, View, StyleSheet } from 'react-native'
+import InputItem from '../../components/InputItem'
 import { showMessage } from 'react-native-flash-message'
 import * as yup from 'yup'
+import { createCategory } from '../../api/RestaurantEndpoints'
 import TextError from '../../components/TextError'
 import TextRegular from '../../components/TextRegular'
 import * as GlobalStyles from '../../styles/GlobalStyles'
-import { createCategory } from '../../api/RestaurantEndpoints'
 
 export default function CreateRestaurantCategoryScreen ({ navigation, route }) {
   const [backendErrors, setBackendErrors] = useState()
@@ -26,7 +27,7 @@ export default function CreateRestaurantCategoryScreen ({ navigation, route }) {
     try {
       const createdCategory = await createCategory(values)
       showMessage({
-        message: `Category ${createdCategory.name} successfully created!`,
+        message: `Restaurant category ${createdCategory.name} successfully created!`,
         type: 'success',
         style: GlobalStyles.flashStyle,
         titleStyle: GlobalStyles.flashTextStyle
@@ -57,7 +58,9 @@ export default function CreateRestaurantCategoryScreen ({ navigation, route }) {
               }
 
               <Pressable
-              onPress={ handleSubmit }
+              onPress={() => {
+                handleSubmit()
+              }}
               style={({ pressed }) => [
                 {
                   backgroundColor: pressed

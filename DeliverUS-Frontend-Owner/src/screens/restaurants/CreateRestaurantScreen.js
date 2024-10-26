@@ -1,18 +1,18 @@
+import { MaterialCommunityIcons } from '@expo/vector-icons'
+import * as ExpoImagePicker from 'expo-image-picker'
+import { ErrorMessage, Formik } from 'formik'
 import React, { useEffect, useState } from 'react'
 import { Image, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native'
-import * as ExpoImagePicker from 'expo-image-picker'
-import { MaterialCommunityIcons } from '@expo/vector-icons'
-import * as yup from 'yup'
 import DropDownPicker from 'react-native-dropdown-picker'
+import { showMessage } from 'react-native-flash-message'
+import * as yup from 'yup'
+import restaurantBackground from '../../../assets/restaurantBackground.jpeg'
+import restaurantLogo from '../../../assets/restaurantLogo.jpeg'
 import { create, getRestaurantCategories } from '../../api/RestaurantEndpoints'
 import InputItem from '../../components/InputItem'
+import TextError from '../../components/TextError'
 import TextRegular from '../../components/TextRegular'
 import * as GlobalStyles from '../../styles/GlobalStyles'
-import restaurantLogo from '../../../assets/restaurantLogo.jpeg'
-import restaurantBackground from '../../../assets/restaurantBackground.jpeg'
-import { showMessage } from 'react-native-flash-message'
-import { ErrorMessage, Formik } from 'formik'
-import TextError from '../../components/TextError'
 
 export default function CreateRestaurantScreen ({ navigation, route }) {
   const [open, setOpen] = useState(false)
@@ -76,10 +76,12 @@ export default function CreateRestaurantScreen ({ navigation, route }) {
         })
       }
     }
+    // Para que el DropDownPicker se actualice inmediatamente
     const fetchFocus = navigation.addListener('focus', () => {
       fetchRestaurantCategories()
     })
     return fetchFocus
+    //
   }, [route])
 
   useEffect(() => {
@@ -180,6 +182,24 @@ export default function CreateRestaurantScreen ({ navigation, route }) {
                 dropDownStyle={{ backgroundColor: '#fafafa' }}
               />
               <ErrorMessage name={'restaurantCategoryId'} render={msg => <TextError>{msg}</TextError> }/>
+
+              <Pressable
+                onPress={() => navigation.navigate('CreateRestaurantCategoryScreen')}
+                style={({ pressed }) => [
+                  {
+                    backgroundColor: pressed
+                      ? GlobalStyles.brandBlueTap
+                      : GlobalStyles.brandBlue
+                  },
+                  styles.button
+                ]}>
+              <View style={[{ flex: 1, flexDirection: 'row', justifyContent: 'center' }]}>
+                <MaterialCommunityIcons name='folder-plus-outline' color={'white'} size={20}/>
+                <TextRegular textStyle={styles.text}>
+                  New category
+                </TextRegular>
+              </View>
+              </Pressable>
 
               <Pressable onPress={() =>
                 pickImage(

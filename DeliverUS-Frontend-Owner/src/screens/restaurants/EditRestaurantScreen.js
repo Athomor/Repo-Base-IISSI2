@@ -99,10 +99,12 @@ export default function EditRestaurantScreen ({ navigation, route }) {
         })
       }
     }
+    // Para que el DropDownPicker se actualice inmediatamente
     const fetchFocus = navigation.addListener('focus', () => {
       fetchRestaurantCategories()
     })
     return fetchFocus
+    //
   }, [route])
 
   useEffect(() => {
