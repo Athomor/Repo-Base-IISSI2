@@ -99,8 +99,11 @@ export default function EditRestaurantScreen ({ navigation, route }) {
         })
       }
     }
-    fetchRestaurantCategories()
-  }, [])
+    const unsuscribe = navigation.addListener('focus', () => {
+      fetchRestaurantCategories()
+    })
+    return unsuscribe
+  }, [route])
 
   useEffect(() => {
     (async () => {

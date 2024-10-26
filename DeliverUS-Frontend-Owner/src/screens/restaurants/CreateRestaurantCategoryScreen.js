@@ -1,6 +1,6 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { Formik } from 'formik'
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { Pressable, ScrollView, View, StyleSheet } from 'react-native'
 import InputItem from '../../components/InputItem'
 import { showMessage } from 'react-native-flash-message'
@@ -45,7 +45,6 @@ export default function CreateRestaurantCategoryScreen ({ navigation, route }) {
   const createRestaurantCategory = async (values) => {
     setBackendErrors([])
     try {
-      console.log(values)
       const createdCategory = await createCategory(values)
       showMessage({
         message: `Restaurant category ${createdCategory.name} successfully created!`,
@@ -53,14 +52,7 @@ export default function CreateRestaurantCategoryScreen ({ navigation, route }) {
         style: GlobalStyles.flashStyle,
         titleStyle: GlobalStyles.flashTextStyle
       })
-
-      // const currentScreen = navigation.dangerouslyGetState().routes[navigation.dangerouslyGetState().routes.length - 1].name
-
-      // if (currentScreen === 'CreateRestaurantScreen') {
-      //   navigation.navigate('CreateRestaurantScreen', { dirty: true })
-      // } else if (currentScreen === 'EditRestaurantScreen') {
-      //   navigation.navigaet('EditRestaurantScreen', { dirty: true })
-      // }
+      navigation.goBack()
     } catch (err) {
       console.log(err)
       setBackendErrors(err.errors)
@@ -88,7 +80,6 @@ export default function CreateRestaurantCategoryScreen ({ navigation, route }) {
               <Pressable
               onPress={() => {
                 handleSubmit()
-                navigation.goBack()
               }}
               style={({ pressed }) => [
                 {
