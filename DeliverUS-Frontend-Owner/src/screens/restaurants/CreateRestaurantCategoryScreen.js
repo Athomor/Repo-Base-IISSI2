@@ -1,13 +1,13 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { Formik } from 'formik'
 import React, { useState } from 'react'
-import { InputItem, Pressable, ScrollView, View } from 'react-native'
+import { InputItem, Pressable, ScrollView, View, StyleSheet } from 'react-native'
 import { showMessage } from 'react-native-flash-message'
 import * as yup from 'yup'
-import { create } from '../../api/'
 import TextError from '../../components/TextError'
 import TextRegular from '../../components/TextRegular'
 import * as GlobalStyles from '../../styles/GlobalStyles'
+import { createCategory } from '../../api/RestaurantEndpoints'
 
 export default function CreateRestaurantCategoryScreen ({ navigation, route }) {
   const [backendErrors, setBackendErrors] = useState()
@@ -24,7 +24,7 @@ export default function CreateRestaurantCategoryScreen ({ navigation, route }) {
   const createRestaurantCategory = async (values) => {
     setBackendErrors([])
     try {
-      const createdCategory = await create(values)
+      const createdCategory = await createCategory(values)
       showMessage({
         message: `Category ${createdCategory.name} successfully created!`,
         type: 'success',
