@@ -76,10 +76,12 @@ export default function CreateRestaurantScreen ({ navigation, route }) {
         })
       }
     }
-    const unsuscribe = navigation.addListener('focus', () => {
+    // Para que el DropDownPicker se actualice inmediatamente
+    const fetchFocus = navigation.addListener('focus', () => {
       fetchRestaurantCategories()
     })
-    return unsuscribe
+    return fetchFocus
+    //
   }, [route])
 
   useEffect(() => {

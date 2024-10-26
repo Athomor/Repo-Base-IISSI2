@@ -10,23 +10,8 @@ import TextError from '../../components/TextError'
 import TextRegular from '../../components/TextRegular'
 import * as GlobalStyles from '../../styles/GlobalStyles'
 
-// const helpMessages = [
-//   '¡Crear una nueva categoría de comida implica un nuevo universo de sabores!',
-//   '¿No sabes cómo nombrar a tu nueva categoría de comida? ¡Pide ayuda a la IA!',
-//   'Sólo el creador sabe el secreto del sabor.',
-//   '¡Buenos días! Espero que te vaya todo bien en tu restaurante.',
-//   "Mi categoría favorita es la 'Spanish Food', ¿sabes por qué?: ¡porque España tiene la mejor dieta del mundo!"
-// ]
-
 export default function CreateRestaurantCategoryScreen ({ navigation, route }) {
   const [backendErrors, setBackendErrors] = useState()
-
-  // Pal mejorasEcosistema
-  // const [randomHelpMessage, setRandomHelpMessage] = useState()
-  // const [fontSize, setFontSize] = useState(16)
-
-  // const [backgroundColor, setBackgroundColor] = useState(GlobalStyles.brandSuccess)
-  // const [selectedColor, setSelectedColor] = useState(GlobalStyles.brandSuccess)
 
   const initialRestaurantCategoryValues = { name: null }
   const validationSchema = yup.object().shape({
@@ -36,11 +21,6 @@ export default function CreateRestaurantCategoryScreen ({ navigation, route }) {
       .min(3, 'Name too short')
       .max(50, 'Name too long')
   })
-
-  // useEffect(() => {
-  //   const randomIndex = Math.floor(Math.random() * helpMessages.length)
-  //   setRandomHelpMessage(helpMessages[randomIndex])
-  // })
 
   const createRestaurantCategory = async (values) => {
     setBackendErrors([])
