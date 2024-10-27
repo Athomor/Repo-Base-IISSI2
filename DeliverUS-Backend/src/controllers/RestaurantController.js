@@ -1,5 +1,16 @@
 import { Restaurant, Product, RestaurantCategory, ProductCategory } from '../models/models.js'
 
+const sortingProducts = async function (req, res) {
+  try {
+    const restaurant = await Restaurant.findByPk(req.params.restaurantId)
+    restaurant.sortByPrice = !restaurant.sortByPrice
+    await restaurant.save()
+    res.json(restaurant)
+  } catch (err) {
+    res.status(500).send(err)
+  }
+}
+
 const index = async function (req, res) {
   try {
     const restaurants = await Restaurant.findAll(
@@ -50,7 +61,12 @@ const create = async function (req, res) {
 const show = async function (req, res) {
   // Only returns PUBLIC information of restaurants
   try {
-    const restaurant = await Restaurant.findByPk(req.params.restaurantId, {
+    let restaurant = await Restaurant.findByPk(req.params.restaurantId)
+    const chooseOrder = restaurant.sortByPrice
+      ? [[{ model: Product, as: 'products' }, 'price', 'ASC']]
+      : [[{ model: Product, as: 'products' }, 'order', 'ASC']]
+
+    restaurant = await Restaurant.findByPk(req.params.restaurantId, {
       attributes: { exclude: ['userId'] },
       include: [{
         model: Product,
@@ -61,7 +77,7 @@ const show = async function (req, res) {
         model: RestaurantCategory,
         as: 'restaurantCategory'
       }],
-      order: [[{ model: Product, as: 'products' }, 'order', 'ASC']]
+      order: chooseOrder
     }
     )
     res.json(restaurant)
@@ -96,6 +112,7 @@ const destroy = async function (req, res) {
 }
 
 const RestaurantController = {
+  sortingProducts,
   index,
   indexOwner,
   create,
