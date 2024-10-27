@@ -1,5 +1,5 @@
 import Sequelize from 'sequelize'
-import { Order, Product, ProductCategory, Restaurant, RestaurantCategory } from '../models/models.js'
+import { Order, Product, ProductCategory, Restaurant, RestaurantCategory, sequelizeSession } from '../models/models.js'
 
 const indexRestaurant = async function (req, res) {
   try {
@@ -108,25 +108,28 @@ const popular = async function (req, res) {
   }
 }
 
-const promote = async function (req, res) {
+const promote = async function (req, res, next) {
+  const t = await sequelizeSession.transaction()
   try {
-    const promotedProducts = await Product.findAll({
-      where: { restaurantId: req.params.restaurantId, promoted: true }
-    })
+    const existingPromotedProduct = await Product.findOne({ where: { promoted: true } })
 
-    if (promotedProducts.length() > 5) {
-      const olderPromotedProduct = Product.findOne({
-        where: { promoted: true },
-        order: [['promotedAt', 'DESC']]
-      })
-      await Product.update({ promoted: false, promotedAt: null }, { where: { id: olderPromotedProduct.id } })
-      await Product.update({ promoted: true, promotedAt: new Date() }, { where: { id: req.params.productId } })
+    if (existingPromotedProduct) {
+      await Product.update(
+        { promoted: false },
+        { where: { id: existingPromotedProduct.id }, transaction: t }
+      )
     }
 
-    const updatedProduct = await Product.findByPk(req.params.productId)
-    res.json(updatedProduct)
+    await Product.update(
+      { promoted: true },
+      { where: { id: req.params.productId }, transaction: t }
+    )
+
+    await t.commit()
+    res.status(200).send('Product promoted successfully')
   } catch (err) {
-    res.status(500).send(err)
+    await t.rollback()
+    next(err)
   }
 }
 

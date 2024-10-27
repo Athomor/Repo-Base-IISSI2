@@ -4,14 +4,14 @@ import { checkFileIsImage, checkFileMaxSize } from './FileValidationHelper.js'
 
 const maxFileSize = 2000000 // around 2Mb
 
-const check5PromotedProducts = async (value, { req }) => {
-  if (value) {
+const checkOnePromotedProduct = async (promotedValue, { req }) => {
+  if (promotedValue) {
     try {
-      const promotedProducts = await Product.findAll({
+      const promotedProducts = await Product.findOne({
         where: { restaurantId: req.body.restaurantId, promoted: true }
       })
-      if (promotedProducts.length() > 5) {
-        return Promise.reject(new Error('You cannot promote more than 5 products'))
+      if (promotedProducts) {
+        return Promise.reject(new Error('You cannot promote more than 1 product.'))
       } else {
         return Promise.resolve('OK')
       }
@@ -38,7 +38,7 @@ const create = [
   check('order').default(null).optional({ nullable: true }).isInt().toInt(),
   check('availability').optional().isBoolean().toBoolean(),
   check('productCategoryId').exists().isInt({ min: 1 }).toInt(),
-  check('promoted').custom(check5PromotedProducts),
+  check('promoted').custom(checkOnePromotedProduct),
   check('restaurantId').exists().isInt({ min: 1 }).toInt(),
   check('restaurantId').custom(checkRestaurantExists),
   check('image').custom((value, { req }) => {
@@ -56,7 +56,7 @@ const update = [
   check('order').default(null).optional({ nullable: true }).isInt().toInt(),
   check('availability').optional().isBoolean().toBoolean(),
   check('productCategoryId').exists().isInt({ min: 1 }).toInt(),
-  check('promoted').custom(check5PromotedProducts),
+  check('promoted').custom(checkOnePromotedProduct),
   check('restaurantId').not().exists(),
   check('image').custom((value, { req }) => {
     return checkFileIsImage(req, 'image')

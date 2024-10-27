@@ -68,7 +68,9 @@ export default function RestaurantDetailScreen ({ navigation, route }) {
           <TextRegular textStyle={styles.availability }>Not available</TextRegular>
         }
         {item.promoted &&
-          <TextRegular style={{ color: GlobalStyles.brandSuccess }}>Promoted!</TextRegular>
+          <View style={styles.promotedTag}>
+            <TextRegular style={{ color: GlobalStyles.brandSuccess }}>Promoted!</TextRegular>
+          </View>
         }
         <View style={styles.actionButtonsContainer}>
           <Pressable
@@ -224,6 +226,19 @@ export default function RestaurantDetailScreen ({ navigation, route }) {
 }
 
 const styles = StyleSheet.create({
+  promotedTag: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignSelf: 'flex-end',
+    borderWidth: 2,
+    borderColor: GlobalStyles.brandSuccess,
+    padding: 10,
+    borderRadius: 10,
+    height: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: '1%'
+  },
   container: {
     flex: 1
   },

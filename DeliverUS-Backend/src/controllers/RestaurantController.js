@@ -61,7 +61,7 @@ const show = async function (req, res) {
         model: RestaurantCategory,
         as: 'restaurantCategory'
       }],
-      order: [[{ model: Product, as: 'products' }, 'order', 'ASC']]
+      order: [[{ model: Product, as: 'products' }, 'promoted', 'DESC'], [{ model: Product, as: 'products' }, 'order', 'ASC']]
     }
     )
     res.json(restaurant)
