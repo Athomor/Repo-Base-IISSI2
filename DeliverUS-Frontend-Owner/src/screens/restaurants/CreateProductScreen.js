@@ -18,7 +18,7 @@ export default function CreateProductScreen ({ navigation, route }) {
   const [productCategories, setProductCategories] = useState([])
   const [backendErrors, setBackendErrors] = useState()
 
-  const initialProductValues = { name: null, description: null, price: null, order: null, restaurantId: route.params.id, productCategoryId: null, availability: true }
+  const initialProductValues = { name: null, description: null, price: null, order: null, restaurantId: route.params.id, productCategoryId: null, availability: true, highlight: false, highlightedAt: null }
   const validationSchema = yup.object().shape({
     name: yup
       .string()
@@ -34,6 +34,8 @@ export default function CreateProductScreen ({ navigation, route }) {
       .positive('Please provide a positive order value')
       .integer('Please provide an integer order value'),
     availability: yup
+      .boolean(),
+    highlight: yup
       .boolean(),
     productCategoryId: yup
       .number()
@@ -148,6 +150,22 @@ export default function CreateProductScreen ({ navigation, route }) {
                 }
               />
               <ErrorMessage name={'availability'} render={msg => <TextError>{msg}</TextError> }/>
+
+              <TextRegular>Highlight this product?</TextRegular>
+              <Switch
+                trackColor={{ false: GlobalStyles.brandSecondary, true: GlobalStyles.brandPrimary }}
+                thumbColor={values.highlight ? GlobalStyles.brandSecondary : '#f4f3f4'}
+                // onValueChange={toggleSwitch}
+                value={values.highlight}
+                style={styles.switch}
+                onValueChange={value =>
+                  setFieldValue('highlight', value) && (value
+                    ? setFieldValue('highlightedAt', new Date())
+                    : setFieldValue('highlightedAt', null)
+                  )
+                }
+              />
+              <ErrorMessage name={'highlight'} render={msg => <TextError>{msg}</TextError> }/>
 
               <Pressable onPress={() =>
                 pickImage(

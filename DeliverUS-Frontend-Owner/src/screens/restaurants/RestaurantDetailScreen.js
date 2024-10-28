@@ -4,17 +4,19 @@ import { StyleSheet, View, FlatList, ImageBackground, Image, Pressable } from 'r
 import { showMessage } from 'react-native-flash-message'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { getDetail } from '../../api/RestaurantEndpoints'
-import { remove } from '../../api/ProductEndpoints'
+import { highlight, remove } from '../../api/ProductEndpoints'
 import ImageCard from '../../components/ImageCard'
 import TextRegular from '../../components/TextRegular'
 import TextSemiBold from '../../components/TextSemibold'
 import * as GlobalStyles from '../../styles/GlobalStyles'
 import DeleteModal from '../../components/DeleteModal'
+import ConfirmationModal from '../../components/ConfirmationModal'
 import defaultProductImage from '../../../assets/product.jpeg'
 
 export default function RestaurantDetailScreen ({ navigation, route }) {
   const [restaurant, setRestaurant] = useState({})
   const [productToBeDeleted, setProductToBeDeleted] = useState(null)
+  const [productToBeHighlighted, setProductToBeHighlighted] = useState(null)
 
   useEffect(() => {
     fetchRestaurantDetail()
@@ -65,7 +67,11 @@ export default function RestaurantDetailScreen ({ navigation, route }) {
         {!item.availability &&
           <TextRegular textStyle={styles.availability }>Not available</TextRegular>
         }
-         <View style={styles.actionButtonsContainer}>
+        {/* {item.highlight &&
+          <TextSemiBold style={{ color: 'green' }}>Promoted!</TextSemiBold>
+        }
+        Doble check visual */}
+        <View style={styles.actionButtonsContainer}>
           <Pressable
             onPress={() => navigation.navigate('EditProductScreen', { id: item.id })
             }
@@ -102,7 +108,36 @@ export default function RestaurantDetailScreen ({ navigation, route }) {
             </TextRegular>
           </View>
         </Pressable>
+
+        <Pressable
+            onPress={() => { setProductToBeHighlighted(item) }}
+            style={({ pressed }) => [
+              {
+                backgroundColor: pressed
+                  ? GlobalStyles.brandSuccessTap
+                  : GlobalStyles.brandSuccess
+              },
+              styles.actionButton
+            ]}>
+          <View style={[{ flex: 1, flexDirection: 'row', justifyContent: 'center' }]}>
+            <MaterialCommunityIcons name='star' color={'white'} size={20}/>
+            <TextRegular textStyle={styles.text}>
+              Highlight
+            </TextRegular>
+          </View>
+        </Pressable>
+
+        <View>
+          {item.highlight
+            ? <View style={styles.highlightON}>
+                <MaterialCommunityIcons name='star' color={'black'} size={20}/>
+              </View>
+            : <View style={{ marginTop: '110%', marginLeft: '30%' }}>
+                <MaterialCommunityIcons name='star' color={'black'} size={20}/>
+              </View>
+          }
         </View>
+      </View>
       </ImageCard>
     )
   }
@@ -152,6 +187,27 @@ export default function RestaurantDetailScreen ({ navigation, route }) {
     }
   }
 
+  const highlightProduct = async (product) => {
+    try {
+      await highlight(product.id)
+      await fetchRestaurantDetail()
+      setProductToBeHighlighted(null)
+      showMessage({
+        message: `Product ${product.name} highlighted successfully!`,
+        type: 'success',
+        style: GlobalStyles.flashStyle,
+        titleStyle: GlobalStyles.flashTextStyle
+      })
+    } catch (err) {
+      showMessage({
+        message: `Product ${product.name} could not be highlighted.`,
+        type: 'error',
+        style: GlobalStyles.flashStyle,
+        titleStyle: GlobalStyles.flashTextStyle
+      })
+    }
+  }
+
   return (
     <View style={styles.container}>
       <FlatList
@@ -168,11 +224,24 @@ export default function RestaurantDetailScreen ({ navigation, route }) {
         onConfirm={() => removeProduct(productToBeDeleted)}>
           <TextRegular>If the product belong to some order, it cannot be deleted.</TextRegular>
       </DeleteModal>
+      <ConfirmationModal
+        isVisible={productToBeHighlighted !== null}
+        onCancel={() => setProductToBeHighlighted(null)}
+        onConfirm={() => highlightProduct(productToBeHighlighted)}>
+          <TextRegular>Confirm highlighting this product</TextRegular>
+      </ConfirmationModal>
     </View>
   )
 }
 
 const styles = StyleSheet.create({
+  highlightON: {
+    marginTop: '57%',
+    borderWidth: 5,
+    borderColor: 'black',
+    borderRadius: 7,
+    backgroundColor: 'yellow'
+  },
   container: {
     flex: 1
   },
@@ -237,7 +306,7 @@ const styles = StyleSheet.create({
     padding: 10,
     alignSelf: 'center',
     flexDirection: 'column',
-    width: '50%'
+    width: '32%'
   },
   actionButtonsContainer: {
     flexDirection: 'row',

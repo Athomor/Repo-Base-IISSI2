@@ -1,5 +1,5 @@
-import { Product, Order, Restaurant, RestaurantCategory, ProductCategory } from '../models/models.js'
 import Sequelize from 'sequelize'
+import { Order, Product, ProductCategory, Restaurant, RestaurantCategory } from '../models/models.js'
 
 const indexRestaurant = async function (req, res) {
   try {
@@ -107,12 +107,40 @@ const popular = async function (req, res) {
   }
 }
 
+const highlight = async function (req, res) {
+  try {
+    const countHighlightedProducts = await Product.count({ where: { highlight: true } })
+
+    if (countHighlightedProducts > 4) {
+      const olderHighlightedProduct = await Product.findAll({
+        where: { highlight: true },
+        order: [['highlightedAt', 'DESC']]
+      })
+
+      await Product.update(
+        { highlight: false },
+        { where: { id: olderHighlightedProduct.productId } }
+      )
+    }
+
+    const updatedProduct = await Product.update(
+      { highlight: true, highlightedAt: new Date() },
+      { where: { id: req.params.productId } }
+    )
+
+    res.json(updatedProduct)
+  } catch (err) {
+    res.status(500).send(err)
+  }
+}
+
 const ProductController = {
   indexRestaurant,
   show,
   create,
   update,
   destroy,
-  popular
+  popular,
+  highlight
 }
 export default ProductController

@@ -21,7 +21,7 @@ export default function EditProductScreen ({ navigation, route }) {
   const [backendErrors, setBackendErrors] = useState()
   const [product, setProduct] = useState({})
 
-  const [initialProductValues, setInitialProductValues] = useState({ name: null, description: null, price: null, order: null, productCategoryId: null, availability: null, image: null })
+  const [initialProductValues, setInitialProductValues] = useState({ name: null, description: null, price: null, order: null, productCategoryId: null, availability: null, highlight: false, image: null })
   const validationSchema = yup.object().shape({
     name: yup
       .string()
@@ -37,6 +37,8 @@ export default function EditProductScreen ({ navigation, route }) {
       .positive('Please provide a positive order value')
       .integer('Please provide an integer order value'),
     availability: yup
+      .boolean(),
+    highlight: yup
       .boolean(),
     productCategoryId: yup
       .number()
@@ -172,6 +174,22 @@ export default function EditProductScreen ({ navigation, route }) {
                 }
               />
               <ErrorMessage name={'availability'} render={msg => <TextError>{msg}</TextError> }/>
+
+              <TextRegular>Highlight this product?</TextRegular>
+              <Switch
+                trackColor={{ false: GlobalStyles.brandSecondary, true: GlobalStyles.brandPrimary }}
+                thumbColor={values.highlight ? GlobalStyles.brandSecondary : '#f4f3f4'}
+                // onValueChange={toggleSwitch}
+                value={values.highlight}
+                style={styles.switch}
+                onValueChange={value =>
+                  setFieldValue('highlight', value) && (value
+                    ? setFieldValue('highlightedAt', new Date())
+                    : setFieldValue('highlightedAt', null)
+                  )
+                }
+              />
+              <ErrorMessage name={'highlight'} render={msg => <TextError>{msg}</TextError> }/>
 
               <Pressable onPress={() =>
                 pickImage(
