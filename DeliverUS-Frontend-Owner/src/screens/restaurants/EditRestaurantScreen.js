@@ -7,6 +7,8 @@ import DropDownPicker from 'react-native-dropdown-picker'
 import { update, getRestaurantCategories, getDetail } from '../../api/RestaurantEndpoints'
 import InputItem from '../../components/InputItem'
 import TextRegular from '../../components/TextRegular'
+import TextSemiBold from '../../components/TextSemibold'
+import ConfirmationModal from '../../components/ConfirmationModal'
 import * as GlobalStyles from '../../styles/GlobalStyles'
 import restaurantLogo from '../../../assets/restaurantLogo.jpeg'
 import restaurantBackground from '../../../assets/restaurantBackground.jpeg'
@@ -22,7 +24,9 @@ export default function EditRestaurantScreen ({ navigation, route }) {
   const [backendErrors, setBackendErrors] = useState()
   const [restaurant, setRestaurant] = useState({})
 
-  const [initialRestaurantValues, setInitialRestaurantValues] = useState({ name: null, description: null, address: null, postalCode: null, url: null, shippingCosts: null, email: null, phone: null, restaurantCategoryId: null, logo: null, heroImage: null })
+  const [initialRestaurantValues, setInitialRestaurantValues] = useState({ name: null, description: null, address: null, postalCode: null, url: null, shippingCosts: null, percentage: 0, email: null, phone: null, restaurantCategoryId: null, logo: null, heroImage: null })
+  const [percentageDialog, setPercentageDialog] = useState(false)
+
   const validationSchema = yup.object().shape({
     name: yup
       .string()
@@ -44,6 +48,10 @@ export default function EditRestaurantScreen ({ navigation, route }) {
       .number()
       .positive('Please provide a valid shipping cost value')
       .required('Shipping costs value is required'),
+    percentage: yup
+      .number()
+      .min(-5)
+      .max(5),
     email: yup
       .string()
       .nullable()
@@ -129,6 +137,11 @@ export default function EditRestaurantScreen ({ navigation, route }) {
 
   const updateRestaurant = async (values) => {
     setBackendErrors([])
+    if (values.percentage !== 0 && !percentageDialog) {
+      setPercentageDialog(true)
+    } else {
+      setPercentageDialog(false)
+    }
     try {
       const updatedRestaurant = await update(restaurant.id, values)
       showMessage({
@@ -178,6 +191,40 @@ export default function EditRestaurantScreen ({ navigation, route }) {
                 name='shippingCosts'
                 label='Shipping costs:'
               />
+
+              <View style={{ alignItems: 'center', alignContent: 'center', justifyContent: 'center', flexDirection: 'row', marginTop: 20 }}>
+              <Pressable onPress={() => {
+                const newPercentage = values.percentage + 0.5
+                if (newPercentage <= 5) {
+                  setFieldValue('percentage', newPercentage)
+                }
+              }}>
+                <View style={[{ flex: 1, flexDirection: 'row', justifyContent: 'center' }]}>
+                  <MaterialCommunityIcons name='arrow-up-circle' color={'orange'} size={40}/>
+                </View>
+              </Pressable>
+
+                <View style={{ marginLeft: 20, marginRight: 20 }}>
+                  {values.percentage < 0 &&
+                    <TextSemiBold>Porcentaje actual: <TextSemiBold style={{ color: 'red' }}>{values.percentage.toFixed(1)}</TextSemiBold></TextSemiBold>}
+                  {values.percentage > 0 &&
+                    <TextSemiBold>Porcentaje actual: <TextSemiBold style={{ color: 'green' }}>{values.percentage.toFixed(1)}</TextSemiBold></TextSemiBold>}
+                  {values.percentage === 0 &&
+                    <TextSemiBold>Porcentaje actual: {values.percentage.toFixed(1)}</TextSemiBold>}
+                </View>
+
+                <Pressable onPress={() => {
+                  const newPercentage = values.percentage - 0.5
+                  if (newPercentage >= -5) {
+                    setFieldValue('percentage', newPercentage)
+                  }
+                }}>
+                <View style={[{ flex: 1, flexDirection: 'row', justifyContent: 'center' }]}>
+                  <MaterialCommunityIcons name='arrow-down-circle' color={'orange'} size={40}/>
+                </View>
+              </Pressable>
+              </View>
+
               <InputItem
                 name='email'
                 label='Email:'
@@ -252,6 +299,11 @@ export default function EditRestaurantScreen ({ navigation, route }) {
               </Pressable>
             </View>
           </View>
+          <ConfirmationModal
+            isVisible={percentageDialog}
+            onCancel={() => setPercentageDialog(false)}
+            onConfirm={() => updateRestaurant(values)}>
+          </ConfirmationModal>
         </ScrollView>
       )}
     </Formik>

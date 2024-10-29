@@ -46,6 +46,10 @@ const loadModel = (sequelize, DataTypes) => {
       type: DataTypes.DOUBLE
     },
     averageServiceMinutes: DataTypes.DOUBLE,
+    percentage: {
+      type: DataTypes.DOUBLE,
+      defaultValue: 0.0
+    },
     email: DataTypes.STRING,
     phone: DataTypes.STRING,
     logo: DataTypes.STRING,

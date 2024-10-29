@@ -18,13 +18,13 @@ export default function CreateProductScreen ({ navigation, route }) {
   const [productCategories, setProductCategories] = useState([])
   const [backendErrors, setBackendErrors] = useState()
 
-  const initialProductValues = { name: null, description: null, price: null, order: null, restaurantId: route.params.id, productCategoryId: null, availability: true }
+  const initialProductValues = { name: null, description: null, basePrice: null, order: null, restaurantId: route.params.id, productCategoryId: null, availability: true }
   const validationSchema = yup.object().shape({
     name: yup
       .string()
       .max(255, 'Name too long')
       .required('Name is required'),
-    price: yup
+    basePrice: yup
       .number()
       .positive('Please provide a positive price value')
       .required('Price is required'),
@@ -112,7 +112,7 @@ export default function CreateProductScreen ({ navigation, route }) {
                 label='Description:'
               />
               <InputItem
-                name='price'
+                name='basePrice'
                 label='Price:'
               />
               <InputItem
