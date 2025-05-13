@@ -14,11 +14,12 @@ module.exports = {
       description: {
         type: Sequelize.TEXT
       },
-      basePrice: {
+      price: {
         allowNull: false,
         type: Sequelize.DOUBLE
       },
-      finalPrice: {
+      // Solution (given in the student's base project)
+      basePrice: {
         allowNull: false,
         type: Sequelize.DOUBLE
       },

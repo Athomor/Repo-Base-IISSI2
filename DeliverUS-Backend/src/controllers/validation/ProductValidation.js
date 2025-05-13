@@ -17,7 +17,7 @@ const checkRestaurantExists = async (value, { req }) => {
 const create = [
   check('name').exists().isString().isLength({ min: 1, max: 255 }).trim(),
   check('description').optional({ checkNull: true, checkFalsy: true }).isString().isLength({ min: 1 }).trim(),
-  check('finalPrice').exists().isFloat({ min: 0 }).toFloat(),
+  check('price').exists().isFloat({ min: 0 }).toFloat(),
   check('order').default(null).optional({ nullable: true }).isInt().toInt(),
   check('availability').optional().isBoolean().toBoolean(),
   check('productCategoryId').exists().isInt({ min: 1 }).toInt(),
@@ -34,7 +34,7 @@ const create = [
 const update = [
   check('name').exists().isString().isLength({ min: 1, max: 255 }),
   check('description').optional({ nullable: true, checkFalsy: true }).isString().isLength({ min: 1 }).trim(),
-  check('finalPrice').exists().isFloat({ min: 0 }).toFloat(),
+  check('price').exists().isFloat({ min: 0 }).toFloat(),
   check('order').default(null).optional({ nullable: true }).isInt().toInt(),
   check('availability').optional().isBoolean().toBoolean(),
   check('productCategoryId').exists().isInt({ min: 1 }).toInt(),

@@ -1,9 +1,9 @@
-import express from 'express'
 import dotenv from 'dotenv'
-import loadRoutes from './routes/index.js'
+import express from 'express'
 import { initPassport } from './config/passport.js'
-import { initSequelize, disconnectSequelize } from './config/sequelize.js'
+import { disconnectSequelize, initSequelize } from './config/sequelize.js'
 import loadGlobalMiddlewares from './middlewares/GlobalMiddlewaresLoader.js'
+import loadRoutes from './routes/index.js'
 
 const initializeApp = async () => {
   dotenv.config()
@@ -64,4 +64,5 @@ const postInitializeDatabase = async (app) => {
   // To be used for future requirements
 }
 
-export { initializeApp, disconnectDatabase, initializeServer }
+export { disconnectDatabase, initializeApp, initializeServer }
+

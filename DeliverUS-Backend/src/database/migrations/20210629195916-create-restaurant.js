@@ -30,10 +30,6 @@ module.exports = {
         defaultValue: 0.0,
         type: Sequelize.DOUBLE
       },
-      percentage: {
-        type: Sequelize.DOUBLE,
-        defaultValue: 0
-      },
       averageServiceMinutes: {
         allowNull: true,
         type: Sequelize.DOUBLE
@@ -59,6 +55,11 @@ module.exports = {
           'temporarily closed'
         ],
         defaultValue: 'offline'
+      },
+      // Solution
+      percentage: {
+        type: Sequelize.DOUBLE,
+        defaultValue: 0.0
       },
       createdAt: {
         allowNull: false,

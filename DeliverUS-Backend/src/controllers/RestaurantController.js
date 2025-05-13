@@ -1,4 +1,5 @@
-import { Restaurant, Product, RestaurantCategory, ProductCategory, sequelizeSession } from '../models/models.js'
+import { sequelizeSession, Restaurant, Product, RestaurantCategory, ProductCategory } from '../models/models.js'
+import Sequelize from 'sequelize'
 
 const index = async function (req, res) {
   try {
@@ -6,10 +7,10 @@ const index = async function (req, res) {
       {
         attributes: { exclude: ['userId'] },
         include:
-      {
-        model: RestaurantCategory,
-        as: 'restaurantCategory'
-      },
+        {
+          model: RestaurantCategory,
+          as: 'restaurantCategory'
+        },
         order: [[{ model: RestaurantCategory, as: 'restaurantCategory' }, 'name', 'ASC']]
       }
     )
@@ -72,6 +73,7 @@ const show = async function (req, res) {
 
 const update = async function (req, res) {
   try {
+    // Solution: not explicitly requested, but the use of a transaction is valued
     const transaction = await sequelizeSession.transaction()
     await Restaurant.update(req.body, { where: { id: req.params.restaurantId } }, transaction)
 
@@ -79,16 +81,17 @@ const update = async function (req, res) {
       where: {
         restaurantId: req.params.restaurantId
       }
-    })
+    });
 
     for (const product of productsToBeUpdated) {
-      const newPrice = product.basePrice + product.basePrice * (req.body.percentage / 100)
-      await product.update({ finalPrice: newPrice }, transaction)
+      const newPrice = product.basePrice + product.basePrice * (req.body.percentage / 100);
+      await product.update({ price: newPrice }, transaction);
     }
 
     await transaction.commit()
 
     const updatedRestaurant = await Restaurant.findByPk(req.params.restaurantId)
+
     res.json(updatedRestaurant)
   } catch (err) {
     res.status(500).send(err)
@@ -116,6 +119,6 @@ const RestaurantController = {
   create,
   show,
   update,
-  destroy
+  destroy,
 }
 export default RestaurantController

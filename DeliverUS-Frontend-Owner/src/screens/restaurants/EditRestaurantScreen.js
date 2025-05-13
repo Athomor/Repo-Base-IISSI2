@@ -7,6 +7,7 @@ import DropDownPicker from 'react-native-dropdown-picker'
 import { update, getRestaurantCategories, getDetail } from '../../api/RestaurantEndpoints'
 import InputItem from '../../components/InputItem'
 import TextRegular from '../../components/TextRegular'
+import TextSemiBold from '../../components/TextSemibold'
 import * as GlobalStyles from '../../styles/GlobalStyles'
 import restaurantLogo from '../../../assets/restaurantLogo.jpeg'
 import restaurantBackground from '../../../assets/restaurantBackground.jpeg'
@@ -15,14 +16,17 @@ import { ErrorMessage, Formik } from 'formik'
 import TextError from '../../components/TextError'
 import { prepareEntityImages } from '../../api/helpers/FileUploadHelper'
 import { buildInitialValues } from '../Helper'
+import ConfirmationModal from '../../components/ConfirmationModal'
 
 export default function EditRestaurantScreen ({ navigation, route }) {
   const [open, setOpen] = useState(false)
   const [restaurantCategories, setRestaurantCategories] = useState([])
   const [backendErrors, setBackendErrors] = useState()
   const [restaurant, setRestaurant] = useState({})
+  const [percentage, setPercentage] = useState(null)
+  const [toggleConfirmationModal, setToggleConfirmationModal] = useState(false)
 
-  const [initialRestaurantValues, setInitialRestaurantValues] = useState({ name: null, description: null, address: null, postalCode: null, url: null, shippingCosts: null, email: null, phone: null, restaurantCategoryId: null, logo: null, heroImage: null })
+  const [initialRestaurantValues, setInitialRestaurantValues] = useState({ name: null, description: null, address: null, postalCode: null, url: null, shippingCosts: null, email: null, phone: null, restaurantCategoryId: null, logo: null, heroImage: null, percentage: 0.0 })
   const validationSchema = yup.object().shape({
     name: yup
       .string()
@@ -44,6 +48,11 @@ export default function EditRestaurantScreen ({ navigation, route }) {
       .number()
       .positive('Please provide a valid shipping cost value')
       .required('Shipping costs value is required'),
+    percentage: yup
+      .number()
+      .required('Percentage is required')
+      .min(-5, 'Percentage too low')
+      .max(5, 'Percentage too big'),
     email: yup
       .string()
       .nullable()
@@ -66,6 +75,7 @@ export default function EditRestaurantScreen ({ navigation, route }) {
         const preparedRestaurant = prepareEntityImages(fetchedRestaurant, ['logo', 'heroImage'])
         setRestaurant(preparedRestaurant)
         const initialValues = buildInitialValues(preparedRestaurant, initialRestaurantValues)
+        initialValues.percentage = percentage
         setInitialRestaurantValues(initialValues)
       } catch (error) {
         showMessage({
@@ -144,117 +154,173 @@ export default function EditRestaurantScreen ({ navigation, route }) {
     }
   }
 
+  const incrementDiscount = async () => {
+    if (percentage < 5.0) {
+      const newPercentage = percentage + 0.5
+      setPercentage(newPercentage)
+    }
+    return percentage
+  }
+
+  const decrementDiscount = async () => {
+    if (percentage > -5.0) {
+      const newPercentage = percentage - 0.5
+      setPercentage(newPercentage)
+    }
+    return percentage
+  }
+
   return (
-    <Formik
-      enableReinitialize
-      validationSchema={validationSchema}
-      initialValues={initialRestaurantValues}
-      onSubmit={updateRestaurant}>
-      {({ handleSubmit, setFieldValue, values }) => (
-        <ScrollView>
-          <View style={{ alignItems: 'center' }}>
-            <View style={{ width: '60%' }}>
-              <InputItem
-                name='name'
-                label='Name:'
-              />
-              <InputItem
-                name='description'
-                label='Description:'
-              />
-              <InputItem
-                name='address'
-                label='Address:'
-              />
-              <InputItem
-                name='postalCode'
-                label='Postal code:'
-              />
-              <InputItem
-                name='url'
-                label='Url:'
-              />
-              <InputItem
-                name='shippingCosts'
-                label='Shipping costs:'
-              />
-              <InputItem
-                name='email'
-                label='Email:'
-              />
-              <InputItem
-                name='phone'
-                label='Phone:'
-              />
+    <>
+      <Formik
+        enableReinitialize
+        validationSchema={validationSchema}
+        initialValues={initialRestaurantValues}
+        onSubmit={setToggleConfirmationModal(true)}>
+        {({ handleSubmit, setFieldValue, values }) => (
+          <ScrollView>
+            <View style={{ alignItems: 'center' }}>
+              <View style={{ width: '60%' }}>
+                <InputItem
+                  name='name'
+                  label='Name:'
+                />
+                <InputItem
+                  name='description'
+                  label='Description:'
+                />
+                <InputItem
+                  name='address'
+                  label='Address:'
+                />
+                <InputItem
+                  name='postalCode'
+                  label='Postal code:'
+                />
+                <InputItem
+                  name='url'
+                  label='Url:'
+                />
+                <InputItem
+                  name='shippingCosts'
+                  label='Shipping costs:'
+                />
 
-              <DropDownPicker
-                open={open}
-                value={values.restaurantCategoryId}
-                items={restaurantCategories}
-                setOpen={setOpen}
-                onSelectItem={ item => {
-                  setFieldValue('restaurantCategoryId', item.value)
-                }}
-                setItems={setRestaurantCategories}
-                placeholder="Select the restaurant category"
-                containerStyle={{ height: 40, marginTop: 20 }}
-                style={{ backgroundColor: GlobalStyles.brandBackground }}
-                dropDownStyle={{ backgroundColor: '#fafafa' }}
-              />
-              <ErrorMessage name={'restaurantCategoryId'} render={msg => <TextError>{msg}</TextError> }/>
+                <View style={{ alignSelf: 'center', alignItems: 'center', paddingTop: 15, flexDirection: 'row' }}>
+                  <Pressable onPress={incrementDiscount}>
+                    <MaterialCommunityIcons
+                      name={'arrow-up-circle'}
+                      color={GlobalStyles.brandSecondaryTap}
+                      size={40}
+                    />
+                  </Pressable>
 
-              <Pressable onPress={() =>
-                pickImage(
-                  async result => {
-                    await setFieldValue('logo', result)
-                  }
-                )
-              }
-                style={styles.imagePicker}
-              >
-                <TextRegular>Logo: </TextRegular>
-                <Image style={styles.image} source={values.logo ? { uri: values.logo.assets[0].uri } : restaurantLogo} />
-              </Pressable>
+                  <TextSemiBold>Porcentaje actual: <TextSemiBold
+                      textStyle={{
+                        color: (percentage === 0
+                          ? 'black'
+                          : (percentage > 0.0
+                              ? 'green'
+                              : 'red'
+                            ))
+                      }}>
+                      {percentage}%
+                    </TextSemiBold>
+                  </TextSemiBold>
 
-              <Pressable onPress={() =>
-                pickImage(
-                  async result => {
-                    await setFieldValue('heroImage', result)
-                  }
-                )
-              }
-                style={styles.imagePicker}
-              >
-                <TextRegular>Hero image: </TextRegular>
-                <Image style={styles.image} source={values.heroImage ? { uri: values.heroImage.assets[0].uri } : restaurantBackground} />
-              </Pressable>
-
-              {backendErrors &&
-                backendErrors.map((error, index) => <TextError key={index}>{error.param}-{error.msg}</TextError>)
-              }
-
-              <Pressable
-                onPress={handleSubmit}
-                style={({ pressed }) => [
-                  {
-                    backgroundColor: pressed
-                      ? GlobalStyles.brandSuccessTap
-                      : GlobalStyles.brandSuccess
-                  },
-                  styles.button
-                ]}>
-                <View style={[{ flex: 1, flexDirection: 'row', justifyContent: 'center' }]}>
-                  <MaterialCommunityIcons name='content-save' color={'white'} size={20}/>
-                  <TextRegular textStyle={styles.text}>
-                    Save
-                  </TextRegular>
+                  <Pressable onPress={decrementDiscount}>
+                    <MaterialCommunityIcons
+                      name={'arrow-down-circle'}
+                      color={GlobalStyles.brandSecondaryTap}
+                      size={40}
+                    />
+                  </Pressable>
                 </View>
-              </Pressable>
+
+                <InputItem
+                  name='email'
+                  label='Email:'
+                />
+                <InputItem
+                  name='phone'
+                  label='Phone:'
+                />
+
+                <DropDownPicker
+                  open={open}
+                  value={values.restaurantCategoryId}
+                  items={restaurantCategories}
+                  setOpen={setOpen}
+                  onSelectItem={ item => {
+                    setFieldValue('restaurantCategoryId', item.value)
+                  }}
+                  setItems={setRestaurantCategories}
+                  placeholder="Select the restaurant category"
+                  containerStyle={{ height: 40, marginTop: 20 }}
+                  style={{ backgroundColor: GlobalStyles.brandBackground }}
+                  dropDownStyle={{ backgroundColor: '#fafafa' }}
+                />
+                <ErrorMessage name={'restaurantCategoryId'} render={msg => <TextError>{msg}</TextError> }/>
+
+                <Pressable onPress={() =>
+                  pickImage(
+                    async result => {
+                      await setFieldValue('logo', result)
+                    }
+                  )
+                }
+                  style={styles.imagePicker}
+                >
+                  <TextRegular>Logo: </TextRegular>
+                  <Image style={styles.image} source={values.logo ? { uri: values.logo.assets[0].uri } : restaurantLogo} />
+                </Pressable>
+
+                <Pressable onPress={() =>
+                  pickImage(
+                    async result => {
+                      await setFieldValue('heroImage', result)
+                    }
+                  )
+                }
+                  style={styles.imagePicker}
+                >
+                  <TextRegular>Hero image: </TextRegular>
+                  <Image style={styles.image} source={values.heroImage ? { uri: values.heroImage.assets[0].uri } : restaurantBackground} />
+                </Pressable>
+
+                {backendErrors &&
+                  backendErrors.map((error, index) => <TextError key={index}>{error.param}-{error.msg}</TextError>)
+                }
+
+                <Pressable
+                  onPress={handleSubmit}
+                  style={({ pressed }) => [
+                    {
+                      backgroundColor: pressed
+                        ? GlobalStyles.brandSuccessTap
+                        : GlobalStyles.brandSuccess
+                    },
+                    styles.button
+                  ]}>
+                  <View style={[{ flex: 1, flexDirection: 'row', justifyContent: 'center' }]}>
+                    <MaterialCommunityIcons name='content-save' color={'white'} size={20}/>
+                    <TextRegular textStyle={styles.text}>
+                      Save
+                    </TextRegular>
+                  </View>
+                </Pressable>
+              </View>
             </View>
-          </View>
-        </ScrollView>
-      )}
-    </Formik>
+          </ScrollView>
+        )}
+      </Formik>
+      <ConfirmationModal
+        isVisible={toggleConfirmationModal === true}
+        // onConfirm={() => ()}
+        onCancel={() => (setToggleConfirmationModal(false))}
+      >
+      </ConfirmationModal>
+    </>
   )
 }
 
