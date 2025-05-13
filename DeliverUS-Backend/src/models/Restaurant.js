@@ -49,6 +49,10 @@ const loadModel = (sequelize, DataTypes) => {
     email: DataTypes.STRING,
     phone: DataTypes.STRING,
     logo: DataTypes.STRING,
+    message: {
+      type: DataTypes.STRING,
+      defaultValue: null
+    },
     heroImage: DataTypes.STRING,
     status: {
       type: DataTypes.ENUM,
