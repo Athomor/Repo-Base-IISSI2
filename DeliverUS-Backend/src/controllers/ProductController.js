@@ -1,5 +1,5 @@
-import { Product, Order, Restaurant, RestaurantCategory, ProductCategory } from '../models/models.js'
 import Sequelize from 'sequelize'
+import { Order, Product, ProductCategory, Restaurant, RestaurantCategory } from '../models/models.js'
 
 const indexRestaurant = async function (req, res) {
   try {
@@ -39,6 +39,7 @@ const show = async function (req, res) {
 const create = async function (req, res) {
   let newProduct = Product.build(req.body)
   try {
+    newProduct.basePrice = newProduct.finalPrice
     newProduct = await newProduct.save()
     res.json(newProduct)
   } catch (err) {
@@ -48,6 +49,7 @@ const create = async function (req, res) {
 
 const update = async function (req, res) {
   try {
+    req.body.basePrice = req.body.finalPrice
     await Product.update(req.body, { where: { id: req.params.productId } })
     const updatedProduct = await Product.findByPk(req.params.productId)
     res.json(updatedProduct)
