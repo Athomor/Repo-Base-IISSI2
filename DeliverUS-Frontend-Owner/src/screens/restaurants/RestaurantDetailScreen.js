@@ -15,10 +15,24 @@ import defaultProductImage from '../../../assets/product.jpeg'
 export default function RestaurantDetailScreen ({ navigation, route }) {
   const [restaurant, setRestaurant] = useState({})
   const [productToBeDeleted, setProductToBeDeleted] = useState(null)
+  const [fansMessageColor, setFansMessageColor] = useState('black')
+  const [, setToggleFansMessageColor] = useState(false)
 
   useEffect(() => {
     fetchRestaurantDetail()
   }, [route])
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setToggleFansMessageColor(prevToggle => {
+        const newFansMessage = !prevToggle
+        setFansMessageColor(newFansMessage ? 'black' : 'blue')
+        return newFansMessage
+      })
+    }, 1000)
+
+    return () => clearInterval(intervalId)
+  }, [])
 
   const renderHeader = () => {
     return (
@@ -31,6 +45,14 @@ export default function RestaurantDetailScreen ({ navigation, route }) {
             <TextRegular textStyle={styles.description}>{restaurant.restaurantCategory ? restaurant.restaurantCategory.name : ''}</TextRegular>
           </View>
         </ImageBackground>
+
+        {restaurant.message !== null &&
+        <TextSemiBold
+          textStyle={{ alignSelf: 'center', color: fansMessageColor, fontSize: 24, paddingTop: 10 }}
+        >
+          {restaurant.message}
+        </TextSemiBold>
+        }
 
         <Pressable
           onPress={() => navigation.navigate('CreateProductScreen', { id: restaurant.id })
