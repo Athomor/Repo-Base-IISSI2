@@ -12,11 +12,13 @@ import { AuthorizationContext } from '../../context/AuthorizationContext'
 import { showMessage } from 'react-native-flash-message'
 import DeleteModal from '../../components/DeleteModal'
 import restaurantLogo from '../../../assets/restaurantLogo.jpeg'
+import { ActivityIndicator } from 'react-native-web'
 
 export default function RestaurantsScreen ({ navigation, route }) {
   const [restaurants, setRestaurants] = useState([])
   const [restaurantToBeDeleted, setRestaurantToBeDeleted] = useState(null)
   const { loggedInUser } = useContext(AuthorizationContext)
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     if (loggedInUser) {
@@ -24,6 +26,10 @@ export default function RestaurantsScreen ({ navigation, route }) {
     } else {
       setRestaurants(null)
     }
+
+    setTimeout(() => {
+      setIsLoading(false)
+    }, 650)
   }, [loggedInUser, route])
 
   const renderRestaurant = ({ item }) => {
@@ -112,7 +118,24 @@ export default function RestaurantsScreen ({ navigation, route }) {
           </TextRegular>
         </View>
       </Pressable>
-    }
+      }
+      <Pressable
+        onPress={() => navigation.navigate('CreateRestaurantCategoryScreen')}
+        style={({ pressed }) => [
+          {
+            backgroundColor: pressed
+              ? GlobalStyles.brandGreenTap
+              : GlobalStyles.brandGreen
+          },
+          styles.button
+        ]}
+      >
+      <View style={[{ flex: 1, flexDirection: 'row', justifyContent: 'center' }]}>
+        <TextRegular textStyle={styles.text}>
+          Create Restaurant Category
+        </TextRegular>
+      </View>
+      </Pressable>
     </>
     )
   }
@@ -155,21 +178,32 @@ export default function RestaurantsScreen ({ navigation, route }) {
 
   return (
     <>
-    <FlatList
-      style={styles.container}
-      data={restaurants}
-      renderItem={renderRestaurant}
-      keyExtractor={item => item.id.toString()}
-      ListHeaderComponent={renderHeader}
-      ListEmptyComponent={renderEmptyRestaurantsList}
-    />
-    <DeleteModal
-      isVisible={restaurantToBeDeleted !== null}
-      onCancel={() => setRestaurantToBeDeleted(null)}
-      onConfirm={() => removeRestaurant(restaurantToBeDeleted)}>
-        <TextRegular>The products of this restaurant will be deleted as well</TextRegular>
-        <TextRegular>If the restaurant has orders, it cannot be deleted.</TextRegular>
-    </DeleteModal>
+    {isLoading
+      ? (
+          <View style={{ alignContent: 'center', alignItems: 'center', alignSelf: 'center',  }}>
+            <ActivityIndicator size="large" color = {GlobalStyles.blue}/>
+            <TextRegular> Loading restaurants, please wait... </TextRegular>
+          </View>
+        )
+      : (
+          <>
+            <FlatList
+              style={styles.container}
+              data={restaurants}
+              renderItem={renderRestaurant}
+              keyExtractor={item => item.id.toString()}
+              ListHeaderComponent={renderHeader}
+              ListEmptyComponent={renderEmptyRestaurantsList}
+            />
+            <DeleteModal
+              isVisible={restaurantToBeDeleted !== null}
+              onCancel={() => setRestaurantToBeDeleted(null)}
+              onConfirm={() => removeRestaurant(restaurantToBeDeleted)}>
+                <TextRegular>The products of this restaurant will be deleted as well</TextRegular>
+                <TextRegular>If the restaurant has orders, it cannot be deleted.</TextRegular>
+            </DeleteModal>
+          </>
+        )}
     </>
   )
 }

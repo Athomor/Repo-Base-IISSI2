@@ -1,25 +1,26 @@
 import * as ExpoImagePicker from 'expo-image-picker'
-import React, { useContext, useState, useEffect } from 'react'
-import { Image, Keyboard, KeyboardAvoidingView, Platform, Pressable, StyleSheet, TouchableOpacity, TouchableWithoutFeedback, View, ScrollView } from 'react-native'
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
-import { AuthorizationContext } from '../../context/AuthorizationContext'
 import { Formik } from 'formik'
-import * as yup from 'yup'
+import React, { useContext, useEffect, useState } from 'react'
+import { Image, Keyboard, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native'
 import { showMessage } from 'react-native-flash-message'
-import * as GlobalStyles from '../../styles/GlobalStyles'
-import SystemInfo from '../../components/SystemInfo'
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
+import * as yup from 'yup'
 import maleAvatar from '../../../assets/maleAvatar.png'
-import InputItem from '../../components/InputItem'
-import TextRegular from '../../components/TextRegular'
-import TextError from '../../components/TextError'
 import { prepareEntityImages } from '../../api/helpers/FileUploadHelper'
+import InputItem from '../../components/InputItem'
+import SystemInfo from '../../components/SystemInfo'
+import TextError from '../../components/TextError'
+import TextRegular from '../../components/TextRegular'
+import { AuthorizationContext } from '../../context/AuthorizationContext'
+import * as GlobalStyles from '../../styles/GlobalStyles'
 import { buildInitialValues } from '../Helper'
 
 export default function ProfileScreen () {
   const { loggedInUser, signOut, updateProfile } = useContext(AuthorizationContext)
   const [backendErrors, setBackendErrors] = useState()
+  const [toggleShowPassword, setToggleShowPassword] = useState(false)
 
-  const [initialUserValues, setInitialUserValues] = useState({ firstName: null, lastName: null, phone: null, address: null, postalCode: null, avatar: null })
+  const [initialUserValues, setInitialUserValues] = useState({ firstName: null, lastName: null, password: null, phone: null, address: null, postalCode: null, avatar: null })
 
   const validationSchema = yup.object().shape({
     firstName: yup
@@ -136,6 +137,23 @@ export default function ProfileScreen () {
                     label='Last name'
                     textContentType='familyName'
                   />
+                  <View style={{ alignSelf: 'flex-start', flexDirection: 'row' }}>
+                    <InputItem
+                      name='password'
+                      label='Pass'
+                      textContentType='password'
+                      secureTextEntry={toggleShowPassword}
+                    />
+                    <Pressable
+                    onPress={() => {
+                      const newToggle = !toggleShowPassword
+                      setToggleShowPassword(newToggle)
+                    }}
+                    style={{ marginTop: 10, alignSelf: 'center', marginLeft: 10 }}
+                    >
+                      <MaterialCommunityIcons name='eye' size={25}/>
+                    </Pressable>
+                  </View>
                   <InputItem
                     name='phone'
                     label='Phone'
